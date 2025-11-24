@@ -1,57 +1,117 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class ManualJointTest : MonoBehaviour
+public class CatJointController : MonoBehaviour
 {
-    [Header("Body Parts")]
-    public Rigidbody frontBody;
-    public Rigidbody backBody;
+    [Header("References")]
+    public ConfigurableJoint joint;  // 在Inspector中拖入你的Joint
     
-    [Header("Torque Settings")]
-    public float maxTorque = 50f;
+    [Header("Control Settings")]
+    public float maxAngularVelocity = 5f;  // 最大角速度(rad/s)
+    public float driveDamper = 1000f;      // 驱动阻尼
+    public float driveForce = 500f;        // 最大驱动力
+    
+    [Header("Debug")]
+    public bool showDebugInfo = true;
+    
+    void Start()
+    {
+        if (joint == null)
+        {
+            Debug.LogError("请在Inspector中指定ConfigurableJoint!");
+            return;
+        }
+        
+        SetupVelocityDrive();
+    }
+    
+    void SetupVelocityDrive()
+    {
+        // 配置X轴驱动(Twist - 扭转)
+        var xDrive = new JointDrive
+        {
+            positionSpring = 0,
+            positionDamper = driveDamper,
+            maximumForce = driveForce
+        };
+        joint.angularXDrive = xDrive;
+        
+        // 配置YZ轴驱动(Swing - 摆动/弯曲)
+        var yzDrive = new JointDrive
+        {
+            positionSpring = 0,
+            positionDamper = driveDamper,
+            maximumForce = driveForce
+        };
+        joint.angularYZDrive = yzDrive;
+        
+        // 设置为XYZ模式
+        joint.rotationDriveMode = RotationDriveMode.XYAndZ;
+        
+        Debug.Log("Velocity Drive配置完成");
+    }
     
     void FixedUpdate()
     {
-        // 在 FrontBody 的局部坐标系里定义力矩向量
-        Vector3 localTorque = Vector3.zero;
+        if (joint == null) return;
+        
+        Vector3 targetVelocity = Vector3.zero;
         
         // 键盘输入
-        if (UnityEngine.InputSystem.Keyboard.current.digit1Key.isPressed) localTorque.x = 1f;   // Pitch +
-        if (UnityEngine.InputSystem.Keyboard.current.digit2Key.isPressed) localTorque.x = -1f;  // Pitch -
-        if (UnityEngine.InputSystem.Keyboard.current.digit3Key.isPressed) localTorque.z = 1f;   // Roll +
-        if (UnityEngine.InputSystem.Keyboard.current.digit4Key.isPressed) localTorque.z = -1f;  // Roll -
-        if (UnityEngine.InputSystem.Keyboard.current.digit5Key.isPressed) localTorque.y = 1f;   // Yaw + (应该被限制)
-        if (UnityEngine.InputSystem.Keyboard.current.digit6Key.isPressed) localTorque.y = -1f;  // Yaw - (应该被限制)
+        var keyboard = Keyboard.current;
+        if (keyboard == null) return;
         
-        // 转换到世界坐标系
-        Vector3 worldTorque = frontBody.transform.TransformDirection(localTorque * maxTorque);
+        // X轴 - Twist(扭转,沿着capsule长轴)
+        if (keyboard.digit1Key.isPressed) targetVelocity.x = 1f;
+        if (keyboard.digit2Key.isPressed) targetVelocity.x = -1f;
         
-        // 对两个刚体施加相反的力矩
-        frontBody.AddTorque(worldTorque, ForceMode.Force);
-        backBody.AddTorque(-worldTorque, ForceMode.Force);
+        // Y轴 - Swing1
+        if (keyboard.digit3Key.isPressed) targetVelocity.y = 1f;
+        if (keyboard.digit4Key.isPressed) targetVelocity.y = -1f;
         
-        if (localTorque != Vector3.zero)
+        // Z轴 - Swing2
+        if (keyboard.digit5Key.isPressed) targetVelocity.z = 1f;
+        if (keyboard.digit6Key.isPressed) targetVelocity.z = -1f;
+        
+        // 应用目标角速度
+        joint.targetAngularVelocity = targetVelocity * maxAngularVelocity;
+        
+        // 调试信息
+        if (showDebugInfo && targetVelocity != Vector3.zero)
         {
-            Debug.Log($"Local Torque: {localTorque}, World Torque: {worldTorque}");
+            Debug.Log($"Target Velocity: {targetVelocity}, Scaled: {joint.targetAngularVelocity}");
         }
     }
     
-    // 可视化坐标轴
+    // 用于RL训练的接口
+    public void SetJointVelocity(Vector3 velocity)
+    {
+        if (joint != null)
+        {
+            joint.targetAngularVelocity = velocity * maxAngularVelocity;
+        }
+    }
+    
+    // Gizmos可视化关节坐标系
     void OnDrawGizmos()
     {
-        if (frontBody == null) return;
+        if (joint == null) return;
         
-        Vector3 center = frontBody.position;
+        Vector3 center = joint.transform.position;
         
+        // X轴(红色) - Twist轴
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(center, center + frontBody.transform.right * 1.5f);
-        Gizmos.DrawSphere(center + frontBody.transform.right * 1.5f, 0.1f);
+        Gizmos.DrawLine(center, center + joint.transform.right * 1.5f);
+        Gizmos.DrawSphere(center + joint.transform.right * 1.5f, 0.1f);
         
+        // Y轴(绿色) - Swing1轴
         Gizmos.color = Color.green;
-        Gizmos.DrawLine(center, center + frontBody.transform.up * 1.5f);
-        Gizmos.DrawSphere(center + frontBody.transform.up * 1.5f, 0.1f);
+        Gizmos.DrawLine(center, center + joint.transform.up * 1.5f);
+        Gizmos.DrawSphere(center + joint.transform.up * 1.5f, 0.1f);
         
+        // Z轴(蓝色) - Swing2轴
         Gizmos.color = Color.blue;
-        Gizmos.DrawLine(center, center + frontBody.transform.forward * 1.5f);
-        Gizmos.DrawSphere(center + frontBody.transform.forward * 1.5f, 0.1f);
+        Gizmos.DrawLine(center, center + joint.transform.forward * 1.5f);
+        Gizmos.DrawSphere(center + joint.transform.forward * 1.5f, 0.1f);
     }
 }
