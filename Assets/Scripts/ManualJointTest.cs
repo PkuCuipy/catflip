@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class CatJointController : MonoBehaviour
+public class ManualJointTestControl : MonoBehaviour
 {
     [Header("References")]
     public ConfigurableJoint joint;  // 在Inspector中拖入你的Joint

@@ -19,9 +19,13 @@ public class CatAgent : Agent
     [SerializeField] private float efficiencyPenaltyWeight = 0.05f;
     
     private float previousScore;
+
+    private float DT;
     
     public override void OnEpisodeBegin()
     {
+        DT = Time.fixedDeltaTime;
+        
         // 随机旋转整个猫
         transform.rotation = Random.rotation;
         
@@ -66,6 +70,8 @@ public class CatAgent : Agent
             actions.ContinuousActions[1],
             actions.ContinuousActions[2]
         ) * maxAngularVelocity;
+
+        // Debug.Log($"Actions received: {actions.ContinuousActions[0]}, {actions.ContinuousActions[1]}, {actions.ContinuousActions[2]}");
         
         // 应用到关节
         joint.targetAngularVelocity = targetVelocity;
@@ -82,11 +88,13 @@ public class CatAgent : Agent
         var a = actions.ContinuousActions;
         Vector3 actVec = new Vector3(a[0], a[1], a[2]);
         float actionMagnitude = actVec.magnitude;
-        float efficiencyPenalty = -efficiencyPenaltyWeight * penaltyCurve * actionMagnitude;
+        float efficiencyPenalty = -efficiencyPenaltyWeight * penaltyCurve * actionMagnitude * DT;
         
         AddReward(alignmentReward + efficiencyPenalty);
         
         previousScore = currentScore;
+
+        // Debug.Log($"currentScore: {currentScore}");
     }
     
     private float CalculateAlignment()

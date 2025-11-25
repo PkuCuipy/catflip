@@ -1,0 +1,47 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1764058259",
+        "python_version": "3.9.23 | packaged by conda-forge | (main, Jun  4 2025, 18:02:02) \n[Clang 18.1.8 ]",
+        "command_line_arguments": "/Users/cuipy/miniconda3/envs/catflip/bin/mlagents-learn config/cat_config.yaml --run-id=falling_cat_v1 --force",
+        "mlagents_version": "0.30.0",
+        "mlagents_envs_version": "0.30.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "1.11.0",
+        "numpy_version": "1.21.2",
+        "end_time_seconds": "1764058303"
+    },
+    "total": 44.243742708,
+    "count": 1,
+    "self": 0.013838040999999635,
+    "children": {
+        "run_training.setup": {
+            "total": 0.028993625000000023,
+            "count": 1,
+            "self": 0.028993625000000023
+        },
+        "TrainerController.start_learning": {
+            "total": 44.200911042,
+            "count": 1,
+            "self": 0.0017557090000011044,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 44.1991235,
+                    "count": 1,
+                    "self": 44.1991235
+                },
+                "trainer_threads": {
+                    "total": 9.999999974752427e-07,
+                    "count": 1,
+                    "self": 9.999999974752427e-07
+                },
+                "TrainerController._save_models": {
+                    "total": 3.083300000383815e-05,
+                    "count": 1,
+                    "self": 3.083300000383815e-05
+                }
+            }
+        }
+    }
+}
