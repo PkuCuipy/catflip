@@ -18,7 +18,7 @@ public class CatAgent : Agent
     [SerializeField] private float efficiencyExpScale = 3f;  // 能效惩罚的 exp 缩放
     [SerializeField] private float efficiencyPenaltyWeight = 0.05f;
     
-    private float previousAlignment;
+    private float previousScore;
     
     public override void OnEpisodeBegin()
     {
@@ -34,8 +34,9 @@ public class CatAgent : Agent
         // 重置关节
         joint.targetAngularVelocity = Vector3.zero;
         
-        // 记录初始对齐度
-        previousAlignment = CalculateAlignment();
+        // 记录初始分数
+        float currentAlignment = CalculateAlignment();
+        previousScore = Mathf.Exp(alignmentExpScale * (currentAlignment - 1f));
     }
     
     public override void CollectObservations(VectorSensor sensor)
@@ -69,16 +70,15 @@ public class CatAgent : Agent
         // 应用到关节
         joint.targetAngularVelocity = targetVelocity;
         
-        // 计算奖励
+        // 计算当前分数
         float currentAlignment = CalculateAlignment();
-        float deltaAlignment = currentAlignment - previousAlignment;
+        float currentScore = Mathf.Exp(alignmentExpScale * (currentAlignment - 1f));
         
-        // 对齐度增量奖励（套 exp 平滑）
-        float alignmentReward = Mathf.Exp(alignmentExpScale * currentAlignment) * deltaAlignment;
+        // Incremental reward
+        float alignmentReward = currentScore - previousScore;
         
         // 能效惩罚
-        float normalizedAlignment = (currentAlignment + 1f) / 2f;  // [-1,1] → [0,1]
-        float penaltyCurve = Mathf.Exp(efficiencyExpScale * (normalizedAlignment - 1f));
+        float penaltyCurve = Mathf.Exp(efficiencyExpScale * (currentAlignment - 1f));
         var a = actions.ContinuousActions;
         Vector3 actVec = new Vector3(a[0], a[1], a[2]);
         float actionMagnitude = actVec.magnitude;
@@ -86,7 +86,7 @@ public class CatAgent : Agent
         
         AddReward(alignmentReward + efficiencyPenalty);
         
-        previousAlignment = currentAlignment;
+        previousScore = currentScore;
     }
     
     private float CalculateAlignment()
@@ -94,8 +94,8 @@ public class CatAgent : Agent
         // 腹部朝向与世界上方向的点积 (front.right 是朝上的, back.right 是朝下的)
         float frontAlignment = Vector3.Dot(frontBody.right, Vector3.up);
         float backAlignment = Vector3.Dot(-backBody.right, Vector3.up);
-        Debug.Log($"Front Alignment: {frontAlignment}, Back Alignment: {backAlignment}");
-        return (frontAlignment + backAlignment) / 2f;  // 范围 [-1, 1]
+        float alignment = (frontAlignment + backAlignment) / 2f;  // 范围 [-1, 1]
+        return (alignment + 1f) / 2f;  // 转换到 [0, 1]
     }
     
     public override void Heuristic(in ActionBuffers actionsOut)
