@@ -17,7 +17,7 @@ public class CatAgent : Agent
     [SerializeField] private float alignmentExpScale = 3f;  // 对齐度的 exp 缩放
     [SerializeField] private float efficiencyExpScale = 3f;  // 能效惩罚的 exp 缩放
     [SerializeField] private float efficiencyPenaltyWeight = 0.05f;
-    [SerializeField] private float angularVelocityPenaltyWeight = 0.01f;  // 角速度惩罚权重
+    [SerializeField] private float relativeAngularVelocityPenaltyWeight = 0.01f;  // 相对角速度惩罚权重
     
     private float previousScore;
     private float DT;
@@ -81,17 +81,18 @@ public class CatAgent : Agent
         float alignmentReward = currentScore - previousScore;
         
         // 能效惩罚 (使用当前分数来调节惩罚权重)
-        float penaltyCurvingCoef = currentScore;
+        float penaltyCurve = currentScore;
         var a = actions.ContinuousActions;
         Vector3 actVec = new Vector3(a[0], a[1], a[2]);
         float actionMagnitude = actVec.magnitude;
-        float efficiencyPenalty = -efficiencyPenaltyWeight * penaltyCurvingCoef * actionMagnitude * DT;
+        float efficiencyPenalty = -efficiencyPenaltyWeight * penaltyCurve * actionMagnitude * DT;
         
-        // 角速度惩罚 (分数越高惩罚越高，鼓励稳定)
-        float totalAngularVelocity = frontRb.angularVelocity.magnitude + backRb.angularVelocity.magnitude;
-        float angularVelocityPenalty = -angularVelocityPenaltyWeight * penaltyCurvingCoef * totalAngularVelocity * DT;
+        // 相对角速度惩罚 (两个刚体角速度的差值，分数越高惩罚越高)
+        Vector3 relativeAngularVelocity = frontRb.angularVelocity - backRb.angularVelocity;
+        float relativeAngularVelocityMagnitude = relativeAngularVelocity.magnitude;
+        float relativeAngularVelocityPenalty = -relativeAngularVelocityPenaltyWeight * penaltyCurve * relativeAngularVelocityMagnitude * DT;
         
-        AddReward(alignmentReward + efficiencyPenalty + angularVelocityPenalty);
+        AddReward(alignmentReward + efficiencyPenalty + relativeAngularVelocityPenalty);
         
         previousScore = currentScore;
         // Debug.Log($"currentScore: {currentScore}");
