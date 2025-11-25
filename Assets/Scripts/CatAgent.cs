@@ -14,13 +14,19 @@ public class CatAgent : Agent
     
     [Header("Training Parameters")]
     [SerializeField] private float maxAngularVelocity = 10f;
-    [SerializeField] private float alignmentExpScale = 3f;  // 对齐度的 exp 缩放
-    [SerializeField] private float efficiencyExpScale = 3f;  // 能效惩罚的 exp 缩放
+    [SerializeField] private float alignmentExpScale = 2f;  // 对齐度的 exp 缩放
     [SerializeField] private float efficiencyPenaltyWeight = 0.05f;
-    [SerializeField] private float relativeAngularVelocityPenaltyWeight = 0.01f;  // 相对角速度惩罚权重
+    [SerializeField] private float relativeAngularVelocityPenaltyWeight = 0.005f;  // 相对角速度惩罚权重
+    [SerializeField] private int maxSteps = 250;  // Episode 最大步数
     
     private float previousScore;
     private float DT;
+    
+    // 累计统计
+    private float cumulativeAlignmentRewardForStatOnly;
+    private float cumulativeEfficiencyPenaltyForStatOnly;
+    private float cumulativeAngularVelocityPenaltyForStatOnly;
+    private int stepCount;
     
     public override void OnEpisodeBegin()
     {
@@ -40,6 +46,12 @@ public class CatAgent : Agent
         
         // 记录初始分数
         previousScore = CalculateScore();
+        
+        // 重置累计统计
+        cumulativeAlignmentRewardForStatOnly = 0f;
+        cumulativeEfficiencyPenaltyForStatOnly = 0f;
+        cumulativeAngularVelocityPenaltyForStatOnly = 0f;
+        stepCount = 0;
     }
     
     public override void CollectObservations(VectorSensor sensor)
@@ -94,8 +106,23 @@ public class CatAgent : Agent
         
         AddReward(alignmentReward + efficiencyPenalty + relativeAngularVelocityPenalty);
         
+        // 累加统计
+        cumulativeAlignmentRewardForStatOnly += alignmentReward;
+        cumulativeEfficiencyPenaltyForStatOnly += efficiencyPenalty;
+        cumulativeAngularVelocityPenaltyForStatOnly += relativeAngularVelocityPenalty;
+        stepCount++;
+        
         previousScore = currentScore;
-        // Debug.Log($"currentScore: {currentScore}");
+        
+        // 如果达到最大步数，打印统计并结束 Episode
+        if (stepCount >= maxSteps)
+        {
+            Debug.Log($"Episode End | Steps: {stepCount} | " +
+                      $"  Alignment: {cumulativeAlignmentRewardForStatOnly:F3} | " +
+                      $"  EfficiencyPenalty: {cumulativeEfficiencyPenaltyForStatOnly:F3} | " +
+                      $"  AngVelPenalty: {cumulativeAngularVelocityPenaltyForStatOnly:F3}");
+            EndEpisode();
+        }
     }
     
     private float CalculateScore()
