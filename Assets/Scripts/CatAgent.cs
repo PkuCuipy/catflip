@@ -139,7 +139,9 @@ public class CatAgent : Agent
         float frontScore = Mathf.Exp(alignmentExpScale * (frontNormalized - 1f));
         float backScore = Mathf.Exp(alignmentExpScale * (backNormalized - 1f));
         
-        return (frontScore + backScore) / 2f;
+        // 取二者的最差值, 避免 agent 使用一种 "身子折叠" 的局部极值 trick
+        float theMin = Mathf.Min(frontScore, backScore);
+        return theMin;
     }
     
     public override void Heuristic(in ActionBuffers actionsOut)
