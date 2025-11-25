@@ -114,15 +114,15 @@ public class CatAgent : Agent
         
         previousScore = currentScore;
         
-        // 如果达到最大步数，打印统计并结束 Episode
-        if (stepCount >= maxSteps)
-        {
-            Debug.Log($"Episode End | Steps: {stepCount} | " +
-                      $"  Alignment: {cumulativeAlignmentRewardForStatOnly:F3} | " +
-                      $"  EfficiencyPenalty: {cumulativeEfficiencyPenaltyForStatOnly:F3} | " +
-                      $"  AngVelPenalty: {cumulativeAngularVelocityPenaltyForStatOnly:F3}");
-            EndEpisode();
-        }
+        // // 如果达到最大步数，打印统计并结束 Episode
+        // if (stepCount >= maxSteps)
+        // {
+        //     Debug.Log($"Episode End | Steps: {stepCount} | " +
+        //               $"  Alignment: {cumulativeAlignmentRewardForStatOnly:F3} | " +
+        //               $"  EfficiencyPenalty: {cumulativeEfficiencyPenaltyForStatOnly:F3} | " +
+        //               $"  AngVelPenalty: {cumulativeAngularVelocityPenaltyForStatOnly:F3}");
+        //     EndEpisode();
+        // }
     }
     
     private float CalculateScore()
