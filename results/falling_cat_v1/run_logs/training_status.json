@@ -1,4 +1,62 @@
 {
+    "Cat": {
+        "checkpoints": [
+            {
+                "steps": 2973300,
+                "file_path": "results/falling_cat_v1/Cat/Cat-2973300.onnx",
+                "reward": 0.5688241606537864,
+                "creation_time": 1764061121.287797,
+                "auxillary_file_paths": [
+                    "results/falling_cat_v1/Cat/Cat-2973300.pt"
+                ]
+            },
+            {
+                "steps": 2999950,
+                "file_path": "results/falling_cat_v1/Cat/Cat-2999950.onnx",
+                "reward": 0.5736015943686283,
+                "creation_time": 1764061178.4577038,
+                "auxillary_file_paths": [
+                    "results/falling_cat_v1/Cat/Cat-2999950.pt"
+                ]
+            },
+            {
+                "steps": 3499983,
+                "file_path": "results/falling_cat_v1/Cat/Cat-3499983.onnx",
+                "reward": 0.5676714935269446,
+                "creation_time": 1764061691.2258282,
+                "auxillary_file_paths": [
+                    "results/falling_cat_v1/Cat/Cat-3499983.pt"
+                ]
+            },
+            {
+                "steps": 3999983,
+                "file_path": "results/falling_cat_v1/Cat/Cat-3999983.onnx",
+                "reward": 0.5672754655992509,
+                "creation_time": 1764062167.661259,
+                "auxillary_file_paths": [
+                    "results/falling_cat_v1/Cat/Cat-3999983.pt"
+                ]
+            },
+            {
+                "steps": 4030683,
+                "file_path": "results/falling_cat_v1/Cat/Cat-4030683.onnx",
+                "reward": 0.5930620305479473,
+                "creation_time": 1764062198.198714,
+                "auxillary_file_paths": [
+                    "results/falling_cat_v1/Cat/Cat-4030683.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 4030683,
+            "file_path": "results/falling_cat_v1/Cat.onnx",
+            "reward": 0.5930620305479473,
+            "creation_time": 1764062198.198714,
+            "auxillary_file_paths": [
+                "results/falling_cat_v1/Cat/Cat-4030683.pt"
+            ]
+        }
+    },
     "metadata": {
         "stats_format_version": "0.3.0",
         "mlagents_version": "0.30.0",
