@@ -1,0 +1,29 @@
+{
+    "Cat": {
+        "checkpoints": [
+            {
+                "steps": 73678,
+                "file_path": "results/ppt/Cat/Cat-73678.onnx",
+                "reward": -0.05825641555139971,
+                "creation_time": 1764222560.039351,
+                "auxillary_file_paths": [
+                    "results/ppt/Cat/Cat-73678.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 73678,
+            "file_path": "results/ppt/Cat.onnx",
+            "reward": -0.05825641555139971,
+            "creation_time": 1764222560.039351,
+            "auxillary_file_paths": [
+                "results/ppt/Cat/Cat-73678.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.30.0",
+        "torch_version": "1.11.0"
+    }
+}

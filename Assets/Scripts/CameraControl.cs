@@ -3,12 +3,12 @@ using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
-    [Header("移动设置")]
+    [Header("Movement Settings")]
     public float moveSpeed = 5f;
     public float fastMoveSpeed = 10f;
     public float smoothTime = 0.2f;
 
-    [Header("旋转设置")]
+    [Header("Rotation Settings")]
     public float mouseSensitivity = 5f;
     public float wasdSensitivity = 3f;
     
@@ -17,7 +17,8 @@ public class CameraController : MonoBehaviour
     private Vector3 currentVelocity;
     private Vector3 targetPosition;
     
-    // 新 Input System 的输入
+    // 针对新的输入系统的变量
+    // New Input System variables
     private Vector2 moveInput;
     private Vector2 lookInput;
     private bool isRotating;
@@ -30,11 +31,11 @@ public class CameraController : MonoBehaviour
         
         targetPosition = transform.position;
         
-        Debug.Log("相机控制:");
-        Debug.Log("- WASD: 前后左右移动");
-        Debug.Log("- Q/E: 下降/上升");
-        Debug.Log("- Shift: 加速移动");
-        Debug.Log("- 按住 Control + 触控板拖拽: 旋转视角");
+        Debug.Log("Camera Controls:");
+        Debug.Log("- WASD: Move forward/backward/left/right");
+        Debug.Log("- Q/E: Move down/up");
+        Debug.Log("- Shift: Speed up movement");
+        Debug.Log("- Hold Control + Drag mouse: Rotate view");  
     }
 
     void FixedUpdate()
@@ -47,6 +48,7 @@ public class CameraController : MonoBehaviour
     void HandleInput()
     {
         // 获取键盘输入
+        // Get keyboard input
         moveInput = Vector2.zero;
         
         var keyboard = Keyboard.current;
@@ -58,13 +60,15 @@ public class CameraController : MonoBehaviour
             if (keyboard.dKey.isPressed) moveInput.x += wasdSensitivity;
         }
         
-        // 获取鼠标/触控板输入
+        // 获取鼠标输入
+        // Get mouse input
         var mouse = Mouse.current;
         if (mouse != null)
         {
             lookInput = mouse.delta.ReadValue();
-            
-            // 检查是否应该旋转（按住 Control 或右键）
+
+            // 检查是否按下 Control 以进行旋转
+            // Check if Control key is held for rotation
             isRotating = (keyboard != null && 
                          (keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed)) ||
                          mouse.rightButton.isPressed;
@@ -82,16 +86,19 @@ public class CameraController : MonoBehaviour
             if (keyboard.qKey.isPressed) upDown = -wasdSensitivity;
         }
         
-        // 检查是否按住 Shift 加速
+        // 检查是否按下 Shift 以加快移动速度
+        // Check if shift is held for fast movement
         bool isSprinting = keyboard != null && 
                           (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed);
         float speed = isSprinting ? fastMoveSpeed : moveSpeed;
         
         // 计算移动方向
+        // Calculate movement direction
         Vector3 direction = new Vector3(moveInput.x, upDown, moveInput.y);
         Vector3 move = transform.TransformDirection(direction) * speed * Time.deltaTime;
         
-        // 平滑移动
+        // 平滑移动到目标位置
+        // Smoothly move to the target position
         targetPosition += move;
         transform.position = Vector3.SmoothDamp(
             transform.position, 
@@ -110,7 +117,7 @@ public class CameraController : MonoBehaviour
             rotationX += lookInput.x * sensitivity * Time.deltaTime * 10f;
             rotationY -= lookInput.y * sensitivity * Time.deltaTime * 10f;
             
-            rotationY = Mathf.Clamp(rotationY, -90f, 90f);  // 限制垂直旋转角度
+            rotationY = Mathf.Clamp(rotationY, -90f, 90f);  // Limit vertical rotation (限制垂直旋转)
             
             transform.rotation = Quaternion.Euler(rotationY, rotationX, 0f);
         }

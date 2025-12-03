@@ -4,10 +4,10 @@ using UnityEngine.InputSystem;
 public class ManualJointTestControl : MonoBehaviour
 {
     [Header("References")]
-    public ConfigurableJoint joint;  // 在Inspector中拖入你的Joint
+    public ConfigurableJoint joint;
     
     [Header("Control Settings")]
-    public float maxAngularVelocity = 10f;  // 最大角速度(rad/s)
+    public float maxAngularVelocity = 10f;
     [Header("Debug")]
     public bool showDebugInfo = true;
     
@@ -15,7 +15,7 @@ public class ManualJointTestControl : MonoBehaviour
     {
         if (joint == null)
         {
-            Debug.LogError("请在Inspector中指定ConfigurableJoint!");
+            Debug.LogError("Please assign a ConfigurableJoint to ManualJointTestControl!");
             return;
         }
     }
@@ -27,23 +27,23 @@ public class ManualJointTestControl : MonoBehaviour
         
         Vector3 targetVelocity = Vector3.zero;
         
-        // 键盘输入
+        // Keyboard input
         var keyboard = Keyboard.current;
         if (keyboard == null) return;
         
-        // X轴 - Twist(扭转,沿着capsule长轴)
+        // X axis - Twist
         if (keyboard.digit1Key.isPressed) targetVelocity.x = 1f;
         if (keyboard.digit2Key.isPressed) targetVelocity.x = -1f;
         
-        // Y轴 - Swing1
+        // Y axis - Swing1
         if (keyboard.digit3Key.isPressed) targetVelocity.y = 1f;
         if (keyboard.digit4Key.isPressed) targetVelocity.y = -1f;
         
-        // Z轴 - Swing2
+        // Z axis - Swing2
         if (keyboard.digit5Key.isPressed) targetVelocity.z = 1f;
         if (keyboard.digit6Key.isPressed) targetVelocity.z = -1f;
         
-        // 应用目标角速度
+        // Normalize and apply
         joint.targetAngularVelocity = targetVelocity * maxAngularVelocity;
     }
     

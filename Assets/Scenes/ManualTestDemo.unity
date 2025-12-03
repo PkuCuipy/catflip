@@ -3308,6 +3308,7 @@ GameObject:
   - component: {fileID: 8866598338281266378}
   - component: {fileID: 1170992642870878062}
   - component: {fileID: 860224791872677870}
+  - component: {fileID: 8866598338281266379}
   m_Layer: 0
   m_Name: CatAgent
   m_TagString: Untagged
@@ -3362,6 +3363,19 @@ MonoBehaviour:
   m_UseChildActuators: 1
   m_DeterministicInference: 0
   m_ObservableAttributeHandling: 0
+--- !u!114 &8866598338281266379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8610435968191147317}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f230065cd90524ad1b72039dcbd19e1c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  catRootTransform: {fileID: 4190705422759049360}
 --- !u!23 &8877122586159803591
 MeshRenderer:
   m_ObjectHideFlags: 0
