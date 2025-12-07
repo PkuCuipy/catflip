@@ -31,12 +31,14 @@ public class UIManager : MonoBehaviour
     {
         if (controlsText != null)
         {
-            controlsText.text = @"<b>Camera Controls:</b>
-<b>WASD</b> - Move Forward/Back/Left/Right
-<b>Q/E</b> - Move Down/Up
-<b>Shift/Space</b> - Move Down/Up
-<b>Arrow Keys</b> - Rotate View
-<b>Ctrl+Mouse</b> - Rotate View";
+            controlsText.text = @"<b>Desktop</b>
+  WASD / Arrow Keys - Rotate
+  Right Mouse Drag - Rotate
+  Scroll / Q/E - Zoom
+
+<b>Touch Screen</b>
+  Swipe - Rotate
+  Pinch - Zoom";
         }
     }
 
