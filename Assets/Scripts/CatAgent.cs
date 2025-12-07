@@ -18,9 +18,15 @@ public class CatAgent : Agent
     [SerializeField] private float efficiencyPenaltyWeight = 0.05f;
     [SerializeField] private float relativeAngularVelocityPenaltyWeight = 0.005f;  // Penalty weight for relative angular velocity (相对角速度惩罚权重)
     [SerializeField] private int maxSteps = 250;  // Maximum steps per episode (每个回合的最大步数)
-    
+
+    [Header("Demo Mode Settings")]
+    [SerializeField] private bool demoMode = false;  // Enable demo mode with timer
+    [SerializeField] private float resetInterval = 3f;  // Reset interval in seconds for demo mode
+    [SerializeField] private UIManager uiManager;  // Reference to UIManager for updating progress bar
+
     private float previousScore;
     private float DT;
+    private float demoTimer = 0f;
     
     // 用于 Logging 的累计统计数据
     // Cumulative statistics for logging
@@ -32,32 +38,35 @@ public class CatAgent : Agent
     public override void OnEpisodeBegin()
     {
         DT = Time.fixedDeltaTime;
-        
+
         // 在每个回合开始时随机旋转猫咪
         // Randomly rotate the cat at the start of each episode
         transform.rotation = Random.rotation;
-        
+
         // 重置位置
         // Reset physics
         frontRb.linearVelocity = Vector3.zero;
         frontRb.angularVelocity = Vector3.zero;
         backRb.linearVelocity = Vector3.zero;
         backRb.angularVelocity = Vector3.zero;
-        
+
         // 重置关节
         // Reset joint
         joint.targetAngularVelocity = Vector3.zero;
-        
+
         // 计算初始分数
         // Initialize "previous score" as initial score
         previousScore = CalculateScore();
-        
+
         // 重置累计统计数据
         // Reset cumulative statistics
         cumulativeAlignmentRewardForStatOnly = 0f;
         cumulativeEfficiencyPenaltyForStatOnly = 0f;
         cumulativeAngularVelocityPenaltyForStatOnly = 0f;
         stepCount = 0;
+
+        // Reset demo timer
+        demoTimer = 0f;
     }
     
     public override void CollectObservations(VectorSensor sensor)
@@ -129,10 +138,30 @@ public class CatAgent : Agent
         stepCount++;
         
         previousScore = currentScore;
-        
-        // 如果达到最大步数，打印统计并结束 Episode
-        // If max steps reached, log statistics and end episode
-        if (stepCount >= maxSteps)
+
+        // Demo mode: reset after time interval
+        if (demoMode)
+        {
+            demoTimer += Time.fixedDeltaTime;
+            float progress = Mathf.Clamp01(demoTimer / resetInterval);
+
+            // Update UI progress bar
+            if (uiManager == null)
+            {
+                Debug.LogWarning("UIManager reference is missing in CatAgent.");
+            } 
+            else 
+            {
+                uiManager.UpdateProgressBar(progress, resetInterval);
+            }
+
+            if (demoTimer >= resetInterval)
+            {
+                EndEpisode();
+            }
+        }
+        // Training mode: reset after max steps
+        else if (stepCount >= maxSteps)
         {
             Debug.Log($"Episode End | Steps: {stepCount} | " +
                       $"  Alignment: {cumulativeAlignmentRewardForStatOnly:F3} | " +
