@@ -59,7 +59,7 @@ public class UIManager : MonoBehaviour
 
         if (timerText != null)
         {
-            float timeRemaining = (1f - progress) * resetInterval;
+            float timeRemaining = progress * resetInterval;
             timerText.text = $"Next Reset: {timeRemaining:F1}s";
         }
     }
