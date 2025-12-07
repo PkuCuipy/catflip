@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.EnhancedTouch;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
+
 // Orbital camera that always looks at the origin (0,0,0)
 // Supports both desktop (WASD/Arrow keys/Mouse) and mobile (touch) controls
 public class OrbitalCamera : MonoBehaviour
@@ -22,12 +25,15 @@ public class OrbitalCamera : MonoBehaviour
     [SerializeField] private float mouseRotateSpeed = 0.3f;        // Degrees per pixel
     [SerializeField] private float scrollZoomSpeed = 2f;
     [SerializeField] private float keyboardZoomSpeed = 10f;        // Units per second
-    [SerializeField] private float touchRotateSpeed = 0.2f;        // Degrees per pixel
-    [SerializeField] private float pinchZoomSpeed = 0.01f;
+    [SerializeField] private float touchRotateSpeed = 0.3f;        // Degrees per pixel
+    [SerializeField] private float pinchZoomSpeed = 0.02f;
 
     [Header("Smoothing")]
     [SerializeField] private float smoothTime = 0.1f;
-    [SerializeField] private bool enableSmoothing = true;
+    [SerializeField] private bool enableSmoothing = false;         // Disabled for snappier touch response
+
+    [Header("Debug")]
+    [SerializeField] private bool debugTouch = false;              // Enable to see touch input logs
 
     // Smooth damping
     private float smoothTheta;
@@ -40,6 +46,16 @@ public class OrbitalCamera : MonoBehaviour
     // Touch input
     private Vector2? lastTouchPosition = null;
     private float? lastPinchDistance = null;
+
+    void OnEnable()
+    {
+        EnhancedTouchSupport.Enable();
+    }
+
+    void OnDisable()
+    {
+        EnhancedTouchSupport.Disable();
+    }
 
     void Start()
     {
@@ -56,8 +72,8 @@ public class OrbitalCamera : MonoBehaviour
         Debug.Log("  - Mouse Drag (Right Click): Rotate around target");
         Debug.Log("  - Mouse Scroll / +/- Keys: Zoom in/out");
         Debug.Log("Mobile:");
-        Debug.Log("  - Swipe: Rotate around target");
-        Debug.Log("  - Pinch: Zoom in/out");
+        Debug.Log("  - Single finger swipe: Rotate around target");
+        Debug.Log("  - Two finger pinch: Zoom in/out");
     }
 
     void LateUpdate()
@@ -105,7 +121,7 @@ public class OrbitalCamera : MonoBehaviour
         if (mouse != null && mouse.rightButton.isPressed)
         {
             Vector2 mouseDelta = mouse.delta.ReadValue();
-            theta += mouseDelta.x * mouseRotateSpeed;
+            theta -= mouseDelta.x * mouseRotateSpeed;
             phi += mouseDelta.y * mouseRotateSpeed;
         }
 
@@ -119,64 +135,71 @@ public class OrbitalCamera : MonoBehaviour
 
     void HandleTouchInput()
     {
-        var touchscreen = Touchscreen.current;
-        if (touchscreen == null) return;
+        int touchCount = Touch.activeTouches.Count;
 
-        int touchCount = touchscreen.touches.Count;
+        if (debugTouch && touchCount > 0)
+        {
+            Debug.Log($"Active touches: {touchCount}");
+        }
 
         // Single touch - rotation
         if (touchCount == 1)
         {
-            var touch = touchscreen.touches[0];
+            var touch = Touch.activeTouches[0];
 
-            // Only rotate if touch is actively moving
-            if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Moved)
+            if (touch.phase == UnityEngine.InputSystem.TouchPhase.Began)
             {
-                Vector2 currentPos = touch.position.ReadValue();
-
+                lastTouchPosition = touch.screenPosition;
+            }
+            else if (touch.phase == UnityEngine.InputSystem.TouchPhase.Moved)
+            {
                 if (lastTouchPosition.HasValue)
                 {
-                    Vector2 delta = currentPos - lastTouchPosition.Value;
-                    theta += delta.x * touchRotateSpeed;
-                    phi += delta.y * touchRotateSpeed;
+                    Vector2 delta = touch.screenPosition - lastTouchPosition.Value;
+
+                    // Left/right swipe = horizontal rotation, up/down swipe = vertical rotation
+                    theta -= delta.x * touchRotateSpeed;
+                    phi += delta.y * touchRotateSpeed;  // Inverted: swipe up = look up
+
+                    if (debugTouch)
+                    {
+                        Debug.Log($"Rotation - Delta: {delta}, Theta: {theta:F1}, Phi: {phi:F1}");
+                    }
                 }
 
-                lastTouchPosition = currentPos;
-            }
-            else if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Ended ||
-                     touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Canceled)
-            {
-                lastTouchPosition = null;
+                lastTouchPosition = touch.screenPosition;
             }
 
-            // Reset pinch
+            // Reset pinch state
             lastPinchDistance = null;
         }
         // Two touches - pinch zoom
         else if (touchCount >= 2)
         {
-            var touch0 = touchscreen.touches[0];
-            var touch1 = touchscreen.touches[1];
+            var touch0 = Touch.activeTouches[0];
+            var touch1 = Touch.activeTouches[1];
 
-            Vector2 pos0 = touch0.position.ReadValue();
-            Vector2 pos1 = touch1.position.ReadValue();
-
-            float currentPinchDistance = Vector2.Distance(pos0, pos1);
+            float currentPinchDistance = Vector2.Distance(touch0.screenPosition, touch1.screenPosition);
 
             if (lastPinchDistance.HasValue)
             {
                 float deltaPinch = currentPinchDistance - lastPinchDistance.Value;
                 distance -= deltaPinch * pinchZoomSpeed;
+
+                if (debugTouch)
+                {
+                    Debug.Log($"Pinch - Delta: {deltaPinch:F1}, Distance: {distance:F1}");
+                }
             }
 
             lastPinchDistance = currentPinchDistance;
 
-            // Reset single touch
+            // Reset rotation state
             lastTouchPosition = null;
         }
         else
         {
-            // No touches - reset
+            // No touches - reset all
             lastTouchPosition = null;
             lastPinchDistance = null;
         }

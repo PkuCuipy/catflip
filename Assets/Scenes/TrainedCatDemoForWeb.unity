@@ -749,7 +749,7 @@ MonoBehaviour:
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 0.802
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -1088,23 +1088,6 @@ MonoBehaviour:
   - m_Rig: {fileID: 952957930}
     m_Active: 1
   m_Effectors: []
---- !u!114 &1473210676
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 65702495782764352}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e63189d4ae4014b5fabd9e2d1a5f1c05, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveSpeed: 5
-  smoothTime: 0.2
-  mouseSensitivity: 5
-  wasdSensitivity: 3
-  arrowKeySensitivity: 80
 --- !u!1 &1997496195
 GameObject:
   m_ObjectHideFlags: 0
@@ -1291,7 +1274,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7202193382213218661}
   - component: {fileID: 7370277069366627718}
-  - component: {fileID: 1473210676}
   - component: {fileID: 7370277069366627719}
   m_Layer: 0
   m_Name: Camera
@@ -3791,8 +3773,9 @@ MonoBehaviour:
   keyboardZoomSpeed: 10
   touchRotateSpeed: 0.2
   pinchZoomSpeed: 0.01
-  smoothTime: 0.1
+  smoothTime: 0.01
   enableSmoothing: 1
+  debugTouch: 1
 --- !u!4 &7560755656733955074
 Transform:
   m_ObjectHideFlags: 0
