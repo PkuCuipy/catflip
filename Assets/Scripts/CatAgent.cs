@@ -41,7 +41,20 @@ public class CatAgent : Agent
 
         // 在每个回合开始时随机旋转猫咪
         // Randomly rotate the cat at the start of each episode
-        transform.rotation = Random.rotation;
+        if (demoMode)
+        {
+            // Demo mode: Apply additional rotation to make cat mostly upside-down (背朝天)
+            float xRotation = Random.Range(150f, 210f);
+            float yRotation = Random.Range(-30f, 30f);
+            float zRotation = Random.Range(-30f, 30f);
+            Quaternion additionalRotation = Quaternion.Euler(xRotation, yRotation, zRotation);
+            transform.rotation = additionalRotation * transform.rotation;
+        }
+        else
+        {
+            // Training mode: Fully random rotation
+            transform.rotation = Random.rotation;
+        }
 
         // 重置位置
         // Reset physics
